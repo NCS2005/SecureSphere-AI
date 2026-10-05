@@ -227,6 +227,8 @@ securesphere-ai/
 ## Author
 
 **Nagarjuna Chaitanya Sandeep**  
+**Y.Samuel Dan**
+**Rithika Chalva**
 B.E. CSE (Data Science) · MVSR Engineering College · Hyderabad  
 GitHub: [NCS2005](https://github.com/NCS2005) · LinkedIn: [chaitanya-nagarjuna](https://linkedin.com/in/chaitanya-nagarjuna-3564302a8)
 
