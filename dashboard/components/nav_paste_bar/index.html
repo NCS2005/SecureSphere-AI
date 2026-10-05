@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="./style.css" />
+  <script src="./streamlit-component-lib.js"></script>
+</head>
+<body>
+  <div class="nav-search-bar" id="nav_container">
+    <div class="search-icon-prefix">🔍</div>
+    <div
+      contenteditable="true"
+      id="nav_input"
+      class="nav-input-field"
+      data-placeholder="Ask anything or paste image here (press Ctrl+V)..."
+      spellcheck="false"
+    ></div>
+    <div class="paste-hint-pill" id="hint_pill">
+      <span>Paste</span>
+      <kbd>Ctrl+V</kbd>
+    </div>
+  </div>
+
+  <script src="./main.js"></script>
+</body>
+</html>

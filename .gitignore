@@ -1,0 +1,26 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Environment & Secret files
+.env
+.env.local
+*.env
+
+# Local Database & Logs
+*.db
+*.sqlite3
+*.log
+
+# IDE & Editor Settings
+.vscode/
+.idea/
+*.swp
+
+# Temporary Scratch Files
+scratch/
+paste_source.txt
