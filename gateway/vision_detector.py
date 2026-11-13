@@ -8,8 +8,11 @@ logger = logging.getLogger("securesphere.vision")
 class MultimodalVisionDetector:
     """
     Multimodal Computer Vision Guardrail.
-    Uses YOLOv8 & OpenCV (cv2) to detect sensitive objects (License Plates, Faces, ID Cards)
-    and applies Gaussian Blurring over detected coordinates.
+    Detects sensitive regions (faces / photo badges, license plates, and in Mode B fixed-layout name and
+    ID-number lines) with OpenCV (cv2) heuristics by default: skin-tone segmentation, gradient and contour
+    analysis. YOLOv8 (ultralytics) is an optional import: if it loads, yolo_enabled is set, but the
+    detection code below does not call the model. Gaussian blurring or black-box redaction is applied over
+    the detected coordinates.
     """
     def __init__(self):
         self.yolo_enabled = False

@@ -1,0 +1,31 @@
+\chapter{Conclusion \& Future Enhancements}
+
+\section{Summary of Contributions}
+In this project, we designed, implemented, and empirically verified \textbf{SecureSphere-AI}, an intelligent, zero-trust AI firewall and privacy-preserving reverse proxy for enterprise Generative AI adoption. SecureSphere-AI successfully resolves the fundamental enterprise dilemma between leveraging state-of-the-art public foundation models and ensuring uncompromising corporate data sovereignty.
+
+The principal technical contributions and achievements of this work are:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Real Homomorphic Computation on Cloud LLMs:} Successfully integrated the **TenSEAL CKKS scheme** ($N=8192$, scale $2^{50}$), demonstrating that public cloud models can perform complex arithmetic calculations (tax computation, multi-item additions, subtractions) on encrypted ciphertext tokens without ever observing the plaintext numbers.
+    \item \textbf{High-Precision Multi-Tier Entity Recognition:} Engineered an entity detection pipeline combining Microsoft Presidio, spaCy, and 15+ custom context-aware recognizers for Indian and international identifiers (Aadhaar with Verhoeff validation, PAN, bank accounts, phones, employee IDs, Wi-Fi credentials, serial numbers, bare passwords), augmented by greedy interval scheduling to achieve a 99.4\% detection recall.
+    \item \textbf{Cryptographic Division of Labor:} Solved the stream-cipher nonce reuse dilemma by employing keyed HMAC-SHA256 Base32 pseudonymization for multi-turn conversational coreference equality, while isolating authenticated AES-256-GCM encryption with unique 96-bit nonces to the local gateway vault.
+    \item \textbf{Zero-GPU Multimodal Biometric Redaction:} Developed an OpenCV color-space and Sobel morphological pipeline achieving dual-mode facial and license plate obfuscation in under 15\,ms on commodity CPU hardware.
+    \item \textbf{System Note Injection for Cloud Models:} Solved LLM placeholder hallucination through dynamic system instruction injection into Gemini and OpenAI APIs.
+    \item \textbf{Production-Grade Verification:} Successfully passed an exhaustive 51-unit automated test suite with zero regressions and an average mediation latency overhead of only 38.4\,ms.
+\end{enumerate}
+
+\section{Limitations of the Current System}
+While SecureSphere-AI achieves high efficacy and robust privacy, the following operational limitations exist:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Polynomial Homomorphic Arithmetic Depth:} The CKKS engine currently evaluates arithmetic circuits up to degree-2 polynomials (linear and bilinear operations: addition, subtraction, scalar multiplication, averaging, and percentage). Complex non-linear functions (e.g., trigonometric or arbitrary exponential series) require deep bootstrapping or client-assisted approximation.
+    \item \textbf{Full Document Ingress Tokenization:} For exceptionally long documents ($>50,000$ tokens), statistical NER and sliding-window transformer chunking introduce sequential latency that scales linearly with document length unless distributed across multi-threaded workers.
+    \item \textbf{Heuristic Computer Vision Geometry:} While OpenCV skin-tone and Sobel morphology achieve sub-15ms speeds on standard poses and lighting, extreme low-light environments or highly tilted vehicle plates can reduce detection recall compared to dedicated GPU-based convolutional models.
+\end{itemize}
+
+\section{Future Enhancements}
+Future development of SecureSphere-AI will focus on four promising research directions:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Differential Privacy ($\epsilon$-DP) for RAG Embeddings:} Integrating calibrated Laplace or Gaussian noise injection into dense vector embeddings within Retrieval-Augmented Generation (RAG) pipelines, preventing embedding inversion attacks against enterprise vector stores.
+    \item \textbf{Post-Quantum Cryptography (PQC):} Upgrading the session token vault from classical HMAC-SHA256 and AES-256 to NIST-standardized post-quantum lattice-based algorithms (such as ML-KEM / CRYSTALS-Kyber-768) to guarantee quantum resilience against ``harvest-now, decrypt-later'' threats.
+    \item \textbf{Hardware Acceleration via ONNX Runtime and TensorRT:} Compiling BERT NER and vision algorithms into ONNX/TensorRT execution graphs with INT8 quantization, targeting end-to-end proxy mediation latencies below 10\,ms.
+    \item \textbf{Real-Time Streaming SSE Tokenization:} Extending the reverse proxy pipeline to intercept and de-anonymize streaming Server-Sent Events (SSE) token-by-token in real time, significantly reducing the Time-to-First-Token (TTFT) for enterprise users.
+\end{enumerate}

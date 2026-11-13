@@ -18,12 +18,12 @@ Client App → [SecureSphere Gateway] → Local LLM (Ollama)  ← PII detected
 ## Features
 
 ### 🔍 PII Detection & Pseudonymization
-- Powered by **Microsoft Presidio** + **spaCy** + custom regex patterns (supporting Indian & global identifiers: Aadhaar, PAN cards, passport numbers, CVV codes, passwords, monetary values, emails, phone numbers).
+- Powered by **Microsoft Presidio** + **spaCy `en_core_web_sm`** (small statistical NER model) + custom regex recognizers (supporting Indian & global identifiers: Aadhaar, PAN cards, passport numbers, CVV codes, passwords, monetary values, emails, phone numbers).
 - PII tokens replaced with deterministic **HMAC-SHA256 pseudonyms** — consistent across the session, reversible at response time.
 
 ### 🔒 Cryptographic Encryption & Masking
 - **AES-256-GCM vault** for authenticated field-level encryption of sensitive values.
-- **Affine Homomorphic Scalar Masking** ($S' = aS + b$) for numeric PII with verifiable inverse decoding.
+- **Real CKKS homomorphic encryption (TenSEAL)** for numeric PII: amounts are encrypted before reaching any LLM; requested calculations (SUM, SUB, AVG, MUL, PCT) run on ciphertexts in a compute module that holds no secret key (`gateway/ckks_engine.py`). Set `NUMERIC_PRIVACY_MODE=affine` to use the earlier affine masking ($S' = aS + b$, not real encryption).
 - Full **deanonymization** on the response path — users see real values in replies.
 
 ### 🧠 Dual-Phase Policy & Jailbreak Guardrail
@@ -42,7 +42,7 @@ Client App → [SecureSphere Gateway] → Local LLM (Ollama)  ← PII detected
 - Built on **OpenCV** heuristics with interactive custom navigation paste bar.
 
 ### ✅ Outbound Response Validation
-- Output scanned via **toxic-bert** (or keyword fallback).
+- Output scanned via **toxic-bert** when `transformers`/`torch` are installed; otherwise it falls back to a keyword check.
 - Credential-leak redaction on all LLM responses.
 - Audit log of every request/response pair.
 
@@ -93,7 +93,7 @@ securesphere-ai/
 | Layer | Technology |
 |-------|-----------|
 | Gateway | Python · FastAPI · Uvicorn |
-| PII Detection | Microsoft Presidio · spaCy · Regex |
+| PII Detection | Microsoft Presidio · spaCy `en_core_web_sm` · custom regex recognizers |
 | Local LLM | Ollama (Llama 3.2) |
 | Cloud LLM | Google Gemini 2.5 Flash · OpenAI API |
 | Vision | OpenCV |

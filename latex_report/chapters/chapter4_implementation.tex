@@ -1,0 +1,131 @@
+\chapter{Implementation}
+
+\section{Environmental Setup}
+The implementation of SecureSphere-AI was conducted using Python 3.11/3.14 within an isolated virtual environment. The core runtime dependencies and library versions are specified in \texttt{requirements.txt}:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Asynchronous API Server:} \texttt{fastapi>=0.100.0}, \texttt{uvicorn[standard]>=0.22.0}, \texttt{httpx>=0.24.0}.
+    \item \textbf{Privacy \& NLP:} \texttt{presidio-analyzer>=2.2.0}, \texttt{presidio-anonymizer>=2.2.0}, \texttt{spacy>=3.5.0} with the statistical model \texttt{en\_core\_web\_sm}.
+    \item \textbf{Homomorphic Encryption \& Cryptography:} \texttt{tenseal>=0.3.16}, \texttt{cryptography>=41.0.0}, \texttt{pycryptodome>=3.18.0}, \texttt{numpy>=1.24.0}.
+    \item \textbf{Computer Vision:} \texttt{opencv-python>=4.8.0}.
+    \item \textbf{UI \& Data Persistence:} \texttt{streamlit>=1.22.0}, \texttt{pymongo>=4.3.0}, \texttt{plotly>=5.15.0}, \texttt{pandas>=2.0.0}.
+\end{itemize}
+
+The gateway runtime behavior is managed via an environment configuration file (\texttt{.env}):
+\begin{verbatim}
+PORT=8000
+HOST=0.0.0.0
+MOCK_CLOUD=false
+GEMINI_API_KEY=your_gemini_api_key_here
+NUMERIC_PRIVACY_MODE=ckks       # Options: ckks (TenSEAL) | affine (scalar fallback)
+ENTITY_ENGINE=spacy             # Options: spacy (default) | spacy_bert (Transformer)
+BYPASS_PII_ROUTING=true         # Route sanitized tokens to cloud
+ENFORCE_TOXICITY=true
+TOXICITY_THRESHOLD=0.80
+\end{verbatim}
+
+\section{Implementation of Each Module}
+
+\subsection{TenSEAL CKKS Homomorphic Engine (\texttt{gateway/ckks\_engine.py})}
+The homomorphic module enforces a strict separation between key ownership and compute capabilities:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{\texttt{CKKSKeyHolder}:} Resides strictly within the trusted gateway. Initializes the TenSEAL context with polynomial modulus degree $N=8192$, coefficient bit-sizes $(58, 50, 50, 58)$, and a global scale of $2^{50}$. Exports a public serialized context that contains no secret key.
+    \item \textbf{\texttt{CKKSComputeServer}:} Operates without secret keys. It accepts serialized public contexts and ciphertexts, and evaluates operations:
+    \begin{align}
+        c_{\text{sum}} &= c_1 + c_2 \\
+        c_{\text{sub}} &= c_1 - c_2 \\
+        c_{\text{avg}} &= \frac{1}{k} \sum_{i=1}^k c_i \\
+        c_{\text{mul}} &= c_1 \times k \\
+        c_{\text{pct}} &= c_1 \times \left(\frac{p}{100}\right)
+    \end{align}
+    \item \textbf{Formatting and Bracket Tolerance:} The parser uses regular expression \texttt{\_ARG\_TOKEN\_RE} to accept tokens whether wrapped in square brackets, parentheses, quotes, or markdown backticks:
+    \begin{verbatim}
+_ARG_TOKEN_RE = re.compile(
+    r"[\s`'\"*\[(]*CKKS_NUM_([0-9a-f]{8})_(\d+)[\s`'\"*\])]*"
+)
+OP_RE = re.compile(r"\bCKKS_(SUM|SUB|AVG|MUL|PCT)\(([^()]*)\)")
+    \end{verbatim}
+\end{enumerate}
+
+\subsection{Contextual Entity Recognition Pipeline (\texttt{gateway/pii\_detector.py})}
+The entity detection engine registers 15+ custom recognizers on top of Microsoft Presidio:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Bank Account Recognition (\texttt{BankAccountRecognizer}):} Matches 9--18 digit numbers following bank account cues (\texttt{account}, \texttt{acct}, \texttt{a/c}). It is assigned a confidence score of 0.95, ensuring that 12-digit bank accounts are prioritized over 12-digit Aadhaar numbers during span resolution.
+    \item \textbf{Contextless Phone Recognition (\texttt{PhoneRecognizer}):} Matches Indian mobile numbers with optional \texttt{+91}, \texttt{91}, or \texttt{0} prefixes (10 digits starting 6--9) and international numbers formatted to E.164 (8--15 digits with leading \texttt{+}). Pincodes, dates, and Aadhaar numbers are explicitly rejected.
+    \item \textbf{Employee Badge Recognition (\texttt{EmployeeIdRecognizer}):} Identifies identifiers containing digits following employee cues (\texttt{EMP-20457}, \texttt{badge \#1043}). The recognizer trims the cue phrase, isolating strictly the code within the token span.
+    \item \textbf{Credential Identifiers (\texttt{CueCodeRecognizer}):} A parameterized recognizer capturing Usernames (\texttt{admin\_01}), Wi-Fi passphrases (\texttt{Secure@2024}), Building Access Cards (\texttt{AC-4912}), and Hardware Serial Numbers (\texttt{S/N-99482}).
+    \item \textbf{Currency Suffix Recognizer (\texttt{money\_suffix\_pattern}):} Captures unformatted numbers followed by currency denominations (\texttt{45000 INR}, \texttt{85000 rupees}, \texttt{5000 USD}).
+    \item \textbf{Bare Password Recognizer (\texttt{PasswordRecognizer}):} Employs regex matching for un-delimited password declarations containing symbols or digits (e.g., \texttt{login password Welcome@2024}).
+    \item \textbf{Interval Resolution (\texttt{filter\_overlapping\_results}):} Resolves token collisions using greedy interval scheduling, prioritizing candidates by highest confidence score and longest character span.
+    \item \textbf{Optional BERT NER Layer (\texttt{BertEntityLayer}):} Implements sliding-window chunking (1,000 characters per window) with boundary alignment and global character offset synchronization, deploying Hugging Face \texttt{dslim/bert-base-NER} on CPU.
+\end{itemize}
+
+\subsection{Cloud Router and Prompt Instruction Injection (\texttt{gateway/router.py})}
+To guarantee that cloud foundation models do not modify or hallucinate over cryptographic placeholders, the router inspects the sanitized text using \texttt{placeholder\_note()}:
+\begin{verbatim}
+PLACEHOLDER_RE = re.compile(
+    r"\[(?:TOKEN_[A-Za-z0-9_]+|CKKS_NUM_[0-9a-f]{8}_\d+)\]"
+)
+PLACEHOLDER_NOTE = (
+    "The text contains placeholders in square brackets (for example [TOKEN_...] "
+    "or [CKKS_NUM_...]). Treat each as a real value. Copy it exactly as written, "
+    "never invent, expand or blank it out."
+)
+\end{verbatim}
+If placeholders are present, the instruction is dynamically attached to the payload:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Google Gemini 2.5 Flash:} Embedded as \texttt{payload["systemInstruction"]}.
+    \item \textbf{OpenAI GPT-4o:} Prepended as a \texttt{\{"role": "system"\}} message in the chat history.
+\end{itemize}
+
+\subsection{Computer Vision Heuristic Redaction (\texttt{gateway/vision\_detector.py})}
+The vision pipeline executes with zero deep-learning dependencies:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Biometric Face Segmentation:} Converts the image to HSV and YCrCb color spaces. Thresholds skin-tone pixels:
+    \begin{equation}
+    \text{Mask}_{\text{HSV}} = (0 \le H \le 25) \land (30 \le S \le 255)
+    \end{equation}
+    \begin{equation}
+    \text{Mask}_{\text{YCrCb}} = (133 \le Cr \le 173) \land (77 \le Cb \le 127)
+    \end{equation}
+    Applies morphological open/close operations with an elliptical kernel ($7 \times 7$) and filters contours by area ($>2\%$ of image) and facial aspect ratio ($0.5 \le \frac{w}{h} \le 1.8$).
+    \item \textbf{License Plate Detection:} Computes horizontal Sobel gradients on grayscale frames:
+    \begin{equation}
+    G_x = \left| \frac{\partial I}{\partial x} \right|
+    \end{equation}
+    Applies Otsu thresholding and rectangular closing ($17 \times 5$ kernel). Contours matching aspect ratio $2.2 \le \frac{w}{h} \le 5.5$ are identified as license plates.
+    \item \textbf{Dual Redaction Execution:}
+    \begin{itemize}
+        \item \textbf{Mode A (Biometric Shield):} Applies Gaussian blur ($\sigma = 25$--$35$, kernel $51 \times 51$) to face and plate regions.
+        \item \textbf{Mode B (Air-Gap):} Applies solid black-box redaction to ID card photos, employee names, and badge numbers, while ignoring vehicle license plates.
+    \end{itemize}
+\end{enumerate}
+
+\section{Database Design and Connectivity}
+Audit logging is orchestrated by \texttt{gateway/database.py}. The primary connection targets MongoDB on \texttt{mongodb://localhost:27017/securesphere}. If the MongoDB daemon is offline, a 2-second timeout triggers an autonomous failover to an embedded SQLite database (\texttt{securesphere.db}) structured as:
+\begin{verbatim}
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp TEXT,
+    user_id TEXT,
+    prompt TEXT,
+    sanitized_prompt TEXT,
+    response TEXT,
+    model_used TEXT,
+    pii_detected INTEGER,
+    pii_types TEXT,
+    status TEXT,
+    toxicity_score REAL,
+    latency_ms INTEGER
+);
+\end{verbatim}
+
+\section{Integration and Deployment}
+The entire application stack is deployed locally using the automated startup script \texttt{start\_securesphere.bat}:
+\begin{verbatim}
+@echo off
+start "SecureSphere Gateway" cmd /k python -m uvicorn gateway.main:app 
+    --host 127.0.0.1 --port 8000
+start "SecureSphere Dashboard" cmd /k python -m streamlit run 
+    dashboard/app.py --server.address 127.0.0.1 --server.port 8501
+\end{verbatim}
+The gateway exposes REST endpoints including \texttt{/generate} (single prompt mediation), \texttt{/generate-multimodal} (image + prompt ingestion), \texttt{/v1/chat/completions} (OpenAI drop-in compatibility), and \texttt{/health} (live operational monitoring).

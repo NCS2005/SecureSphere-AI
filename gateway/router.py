@@ -1,8 +1,20 @@
+import re
 import httpx
 import logging
 from gateway.config import settings
 
 logger = logging.getLogger("securesphere.router")
+
+# System instruction for cloud models, added only when the sanitized text contains placeholders.
+PLACEHOLDER_RE = re.compile(r"\[(?:TOKEN_[A-Za-z0-9_]+|CKKS_NUM_[0-9a-f]{8}_\d+)\]")
+PLACEHOLDER_NOTE = (
+    "The text contains placeholders in square brackets (for example [TOKEN_...] or [CKKS_NUM_...]). "
+    "Treat each as a real value. Copy it exactly as written, never invent, expand or blank it out."
+)
+
+def placeholder_note(prompt: str) -> str:
+    """Returns the placeholder instruction if `prompt` contains at least one placeholder, else ''."""
+    return PLACEHOLDER_NOTE if PLACEHOLDER_RE.search(prompt or "") else ""
 
 async def call_cloud_llm(prompt: str) -> str:
     """
@@ -12,6 +24,8 @@ async def call_cloud_llm(prompt: str) -> str:
     if settings.MOCK_CLOUD:
         logger.info("[Mock Mode] Simulating Cloud LLM call...")
         return f"[Cloud LLM (Mock GPT-4o)] Here is the clean response. You requested details on: '{prompt}'."
+
+    note = placeholder_note(prompt)
 
     # Try Google Gemini first
     if settings.GEMINI_API_KEY:
@@ -26,6 +40,8 @@ async def call_cloud_llm(prompt: str) -> str:
                     }
                 ]
             }
+            if note:
+                payload["systemInstruction"] = {"parts": [{"text": note}]}
             try:
                 async with httpx.AsyncClient(timeout=30.0) as client:
                     response = await client.post(url, json=payload, headers=headers)
@@ -51,6 +67,8 @@ async def call_cloud_llm(prompt: str) -> str:
                 {"role": "user", "content": prompt}
             ]
         }
+        if note:
+            payload["messages"].insert(0, {"role": "system", "content": note})
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(url, json=payload, headers=headers)
@@ -72,6 +90,7 @@ async def call_cloud_multimodal(prompt: str, image_base64: str, mime_type: str =
     """
     Sends the anonymized image + prompt to Gemini Vision (Multimodal).
     """
+    note = placeholder_note(prompt)
     if settings.GEMINI_API_KEY:
         gemini_models = ["gemini-2.5-flash", "gemini-3-flash-preview"]
         for g_model in gemini_models:
@@ -92,6 +111,8 @@ async def call_cloud_multimodal(prompt: str, image_base64: str, mime_type: str =
                     }
                 ]
             }
+            if note:
+                payload["systemInstruction"] = {"parts": [{"text": note}]}
             try:
                 async with httpx.AsyncClient(timeout=35.0) as client:
                     response = await client.post(url, json=payload, headers=headers)

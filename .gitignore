@@ -24,3 +24,4 @@ __pycache__/
 # Temporary Scratch Files
 scratch/
 paste_source.txt
+_backup_pre_ckks/

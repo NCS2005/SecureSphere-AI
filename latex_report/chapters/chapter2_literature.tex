@@ -1,0 +1,62 @@
+\chapter{Background / Literature Survey}
+
+\section{Survey of Major Area Relevant to Project}
+The rapid commercialization of Large Language Models has sparked intensive academic and industrial research into Privacy-Preserving Machine Learning (PPML) and AI Security Guardrails. Foundation models operate under a multi-tenant cloud architecture where client prompts are transmitted over public networks to remote data centers. 
+
+Ghosal et al.~\cite{ghosal2023llm} comprehensively investigated privacy vulnerabilities in commercial LLM APIs, establishing that static blacklisting and regular expression filters fail catastrophically against linguistic morphology, OCR noise, and natural language paraphrasing. Attackers and careless employees routinely bypass static keyword lists by spacing out letters, inserting punctuation, or using colloquial terminology. Furthermore, standard Data Loss Prevention (DLP) engines typically replace detected sensitive text with generic tags (e.g., \texttt{<REDACTED>}). As demonstrated by Carlini et al.~\cite{carlini2021extracting}, naive redaction strips the prompt of semantic coreference equality: if two distinct individuals are both replaced by \texttt{<PERSON>}, the cloud model loses track of relational logic, degrading conversational utility and causing hallucinations.
+
+Another critical domain is Adversarial Prompt Injection and Jailbreaking. Perez and Ribeiro~\cite{perez2022ignore} demonstrated that foundation models are susceptible to indirect prompt injection, where malicious instructions embedded in documents or user inputs override system guardrails. Defending against these attacks requires a dual-phase architecture that intercepts adversarial patterns prior to model execution and validates outputs for policy violations prior to client delivery.
+
+\section{Techniques and Algorithms Relevant to the Project}
+
+\subsection{Homomorphic Encryption and the CKKS Scheme}
+Homomorphic Encryption (HE) represents a cryptographic breakthrough allowing mathematical operations to be performed directly on encrypted data without requiring access to the decryption key. Early fully homomorphic schemes (e.g., Gentry's 2009 lattice-based construction) suffered from prohibitive computational overhead. 
+
+In 2017, Cheon, Kim, Kim, and Song~\cite{cheon2017homomorphic} introduced the **CKKS scheme** (Homomorphic Encryption for Arithmetic of Approximate Numbers). CKKS is tailored for real-number floating-point computation by treating encryption noise as part of the numerical approximation error. Operations occur over the cyclotomic polynomial ring:
+\begin{equation}
+R_q = \mathbb{Z}_q[X] / (X^N + 1)
+\end{equation}
+where $N$ is a power-of-two polynomial modulus degree (typically $N=8192$ or $16384$) and $q$ is a composite ciphertext modulus composed of a chain of prime factors:
+\begin{equation}
+q = \prod_{i=0}^L q_i
+\end{equation}
+Given two plaintexts $m_1, m_2 \in \mathbb{R}$ encrypted into ciphertexts $c_1, c_2 \in R_q^2$, the CKKS addition and multiplication homomorphic properties satisfy:
+\begin{align}
+\text{Dec}(\text{Key}_{\text{secret}}, c_1 + c_2) &\approx m_1 + m_2 \\
+\text{Dec}(\text{Key}_{\text{secret}}, c_1 \cdot c_2) &\approx m_1 \cdot m_2
+\end{align}
+SecureSphere-AI utilizes the **TenSEAL** library~\cite{tenseal2021}, which wraps Microsoft SEAL in high-performance C++ bindings. This allows mathematical queries from external models (e.g., computing an 18\% tax or multi-item expense summation) to execute directly on encrypted ciphertext vectors with zero knowledge of the underlying values.
+
+\subsection{Symmetric Authenticated Encryption vs. Keyed PRFs}
+A critical architectural pitfall in naive security proxies is attempting to use symmetric encryption directly inside prompts. In the Advanced Encryption Standard with Galois/Counter Mode (AES-256-GCM)~\cite{dworkin2007sp800}, encryption combines counter-mode keystream generation with a GHASH polynomial authenticator. If an identical Nonce/Initialization Vector (IV) is reused with the same key across two distinct inputs, an adversary can XOR the ciphertexts:
+\begin{equation}
+C_1 \oplus C_2 = (P_1 \oplus \text{Keystream}) \oplus (P_2 \oplus \text{Keystream}) = P_1 \oplus P_2
+\end{equation}
+This allows complete recovery of the plaintext difference and catastrophic key disclosure. Conversely, generating random nonces produces non-deterministic, high-entropy Base64 strings (e.g., \texttt{7fA9...}) that destroy the model's coreference understanding.
+
+To solve this dilemma, SecureSphere-AI implements a formal cryptographic separation of concerns:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Public Ingress Tokens (Keyed HMAC-SHA256):} Generates deterministic, stable pseudonym tokens:
+    \begin{equation}
+    \text{Token} = \text{Base32}(\text{HMAC-SHA256}(K_{\text{master}}, \text{EntityValue}))[:8]
+    \end{equation}
+    This guarantees that identical entities across multi-turn interactions receive identical tokens ($E_1 = E_1$), preserving grammatical relationships without revealing the underlying data.
+    \item \textbf{Local Session Vault (AES-256-GCM AEAD):} Maps public tokens back to sensitive plaintext strictly within local gateway RAM. Each entry is sealed with a **fresh, cryptographically random 96-bit nonce** ($\text{os.urandom}(12)$), ensuring zero vulnerability to keystream reuse.
+\end{enumerate}
+
+\subsection{Named Entity Recognition (NER) and Contextual Span Resolution}
+Entity detection in SecureSphere-AI merges Microsoft Presidio~\cite{presidio2021} with spaCy's transition-based convolutional parser (\texttt{en\_core\_web\_sm}) and custom context-aware regular expressions. When multiple pattern recognizers fire on overlapping text spans, naive systems experience token truncation or corruption. SecureSphere-AI resolves this using a **Greedy Interval Scheduling Algorithm** that sorts entity candidates and enforces non-overlapping interval acceptance based on confidence dominance and span length.
+
+\subsection{Edge Vision Heuristics vs. Deep Learning Models}
+In visual PII redaction, deep learning detectors like YOLOv8 incur significant computational costs ($\sim$250\,ms CPU latency, 8.7 GFLOPs per forward pass, and over 1\,GB of PyTorch dependencies). For a high-throughput enterprise firewall, this creates an unacceptable bottleneck. By utilizing **OpenCV color-space segmentation (HSV and YCrCb)** for human skin tones combined with **horizontal Sobel gradient morphological filtering** for vehicle license plates, SecureSphere-AI achieves real-time redaction in under 15\,ms on commodity CPU hardware with zero deep learning overhead.
+
+\section{Applications}
+
+\subsection{Enterprise Source Code Debugging and Secret Shielding}
+Software developers frequently paste proprietary code snippets, database connection strings, and internal microservice endpoints into cloud LLMs to troubleshoot syntax or optimize queries. SecureSphere-AI automatically identifies and tokenizes internal IP addresses, database credentials, usernames, and bare passwords. The cloud model inspects the sanitized code structure and returns corrected code, which the gateway de-anonymizes locally, ensuring corporate intellectual property and credentials never touch public servers.
+
+\subsection{Healthcare Clinical Documentation and EHR Scrubbing}
+Healthcare providers subject to HIPAA and DPDP mandates must redact Protected Health Information (PHI) before summarizing clinical records. SecureSphere-AI scrubs patient names, Indian Aadhaar numbers, phone numbers, and dates from clinical consultation logs. Medical researchers can leverage foundation cloud models to analyze diagnostic symptoms and treatment protocols without violating statutory patient privacy.
+
+\subsection{Confidential Financial Risk Assessment and Tax Auditing}
+Financial institutions analyzing confidential employee payrolls, corporate expenses, or personal loan applications require complex calculations without disclosing raw financial balances. By combining deterministic tokenization for client names with **TenSEAL CKKS Homomorphic Encryption** for monetary figures, SecureSphere-AI allows cloud models to formulate mathematical calculations (e.g., tax deductions, bonus distributions, interest amortization) on encrypted ciphertexts, decrypting the exact result only after it returns to the authorized on-premises terminal.

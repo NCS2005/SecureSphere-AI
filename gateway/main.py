@@ -7,7 +7,7 @@ from typing import List, Dict, Any, Optional
 
 from gateway.config import settings
 from gateway.auth import verify_api_key, check_rate_limit
-from gateway.pii_detector import anonymize_prompt, deanonymize_response, detect_pii
+from gateway.pii_detector import anonymize_prompt, deanonymize_response, detect_pii, numeric_scheme_label, entity_engine_description
 from gateway.vision_detector import vision_detector
 from gateway.policy_engine import evaluate_policy
 from gateway.router import route_request
@@ -85,7 +85,8 @@ def health_check():
         "database": "SQLite (Fallback)" if db_use_sqlite else "MongoDB (Active)",
         "bypass_pii_routing": settings.BYPASS_PII_ROUTING,
         "enforce_toxicity": settings.ENFORCE_TOXICITY,
-        "vision_engine": vision_detector.cv2_enabled
+        "vision_engine": vision_detector.cv2_enabled,
+        "entity_engine": entity_engine_description()
     }
 
 class ImageAnonymizeRequest(BaseModel):
@@ -222,7 +223,7 @@ async def generate_diagnostic(
             "crypto_telemetry": {
                 "pseudonym_scheme": "HMAC-SHA256 Base32",
                 "vault_encryption": "AES-256-GCM (96-bit Nonce)",
-                "homomorphic_scheme": "CKKS / Affine Masking"
+                "homomorphic_scheme": numeric_scheme_label()
             }
         }
         
@@ -275,7 +276,7 @@ async def generate_diagnostic(
         "crypto_telemetry": {
             "pseudonym_scheme": "HMAC-SHA256 Base32",
             "vault_encryption": "AES-256-GCM (96-bit Nonce)",
-            "homomorphic_scheme": "CKKS / Affine Masking"
+            "homomorphic_scheme": numeric_scheme_label()
         },
         "tokens_vaulted": len(pii_mapping)
     }

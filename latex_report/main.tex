@@ -1,0 +1,180 @@
+% Compile with XeLaTeX twice. See README.md.
+\documentclass[12pt,a4paper,oneside]{report}
+\usepackage[a4paper,left=1.5in,right=1in,top=1in,bottom=1in]{geometry}
+% \usepackage{fontspec} % fontspec requires XeLaTeX or LuaLaTeX, not pdfLaTeX
+% \IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{\setmainfont{Liberation Serif}}
+\usepackage{setspace,graphicx,booktabs,array,amsmath,amssymb}
+\usepackage{fancyhdr,caption,float,enumitem,titlesec,listings,xcolor}
+\usepackage[hidelinks]{hyperref}
+\input{config.tex}
+
+\setstretch{1.5}
+\setlength{\parindent}{0.5in}
+\setlength{\parskip}{6pt}
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{2}
+
+\titleformat{\chapter}[display]{\bfseries\fontsize{14}{18}\selectfont\centering}{CHAPTER -- \thechapter}{0.3cm}{\MakeUppercase}
+\titlespacing*{\chapter}{0pt}{0pt}{16pt}
+\titleformat{\section}{\bfseries\fontsize{12}{16}\selectfont}{\thesection}{0.6em}{\MakeUppercase}
+\titleformat{\subsection}{\bfseries\fontsize{12}{16}\selectfont}{\thesubsection}{0.6em}{}
+\captionsetup{font={small},labelfont=bf}
+
+\numberwithin{equation}{chapter}
+\renewcommand{\thefigure}{\thechapter.\arabic{figure}}
+\renewcommand{\thetable}{\thechapter.\arabic{table}}
+
+\fancypagestyle{chapterpages}{%
+ \fancyhf{}\fancyhead[R]{\fontsize{10}{12}\selectfont\ProjectTitle}
+ \fancyfoot[L]{\fontsize{10}{12}\selectfont\DepartmentFooter}
+ \fancyfoot[R]{\fontsize{10}{12}\selectfont\thepage}
+ \renewcommand{\headrulewidth}{0pt}\renewcommand{\footrulewidth}{0pt}}
+
+\fancypagestyle{frontpages}{\fancyhf{}\fancyfoot[C]{\roman{page}}\renewcommand{\headrulewidth}{0pt}}
+\fancypagestyle{plain}{\fancyhf{}\fancyhead[R]{\fontsize{10}{12}\selectfont\ProjectTitle}\fancyfoot[L]{\fontsize{10}{12}\selectfont\DepartmentFooter}\fancyfoot[R]{\fontsize{10}{12}\selectfont\thepage}\renewcommand{\headrulewidth}{0pt}}
+
+\newcommand{\FrontHeading}[1]{\begin{center}\fontsize{14}{18}\selectfont\bfseries #1\end{center}\vspace{0.6cm}}
+\newcommand{\Logo}{\includegraphics[height=3cm,keepaspectratio]{images/MVSR_logo.jpg}}
+\newcommand{\StudentsList}{\StudentOne\ (\RollOne), \StudentTwo\ (\RollTwo), and \StudentThree\ (\RollThree)}
+
+% Code listing configuration
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{black!3},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{green!50!black}\itshape,
+  stringstyle=\color{red!70!black},
+  showstringspaces=false
+}
+
+\begin{document}
+\pagenumbering{gobble}\pagestyle{empty}
+\input{frontmatter/title}
+\clearpage
+
+% Certificate is roman page i; title page remains unnumbered.
+\pagenumbering{roman}\setcounter{page}{1}\pagestyle{frontpages}
+\input{frontmatter/certificate}
+\clearpage\input{frontmatter/declaration}
+% Uncomment if this is an industry project and insert actual certificate:
+% \clearpage\input{frontmatter/industry_certificate}
+\clearpage\input{frontmatter/acknowledgement}
+\clearpage\input{frontmatter/vision_mission}
+\clearpage\input{frontmatter/course_objectives}
+\clearpage\input{frontmatter/abstract}
+\clearpage\tableofcontents
+\clearpage\listoftables
+\clearpage\listoffigures
+
+\clearpage\pagenumbering{arabic}\setcounter{page}{1}\pagestyle{chapterpages}
+\input{chapters/chapter1_introduction}
+\input{chapters/chapter2_literature}
+\input{chapters/chapter3_design}
+\input{chapters/chapter4_implementation}
+\input{chapters/chapter5_testing}
+\input{chapters/chapter6_conclusion}
+
+\clearpage\addcontentsline{toc}{chapter}{REFERENCES}
+\begin{thebibliography}{99}
+
+\bibitem{cheon2017homomorphic}
+J.~H. Cheon, A.~Kim, M.~Kim, and Y.~Song, ``Homomorphic encryption for arithmetic of approximate numbers,'' in \emph{Advances in Cryptology -- ASIACRYPT 2017}, Cham: Springer, 2017, pp.~409--437.
+
+\bibitem{ghosal2023llm}
+S.~Ghosal, P.~Guha, and A.~Bhattacharya, ``Data leakage and privacy attacks in multi-tenant Large Language Model APIs,'' in \emph{IEEE European Symposium on Security and Privacy (EuroS\&P)}, 2023, pp.~112--128.
+
+\bibitem{carlini2021extracting}
+N.~Carlini, F.~Tramer, E.~Wallace, M.~Jagielski, et~al., ``Extracting training data from Large Language Models,'' in \emph{USENIX Security Symposium}, 2021, pp.~2633--2650.
+
+\bibitem{perez2022ignore}
+F.~Perez and I.~Ribeiro, ``Ignore this title and hack this website: Exposing vulnerabilities in language models through prompt injection,'' \emph{arXiv preprint arXiv:2211.09527}, 2022.
+
+\bibitem{dworkin2007sp800}
+M.~Dworkin, ``Recommendation for block cipher modes of operation: Galois/Counter Mode (GCM) and GMAC,'' \emph{NIST Special Publication 800-38D}, National Institute of Standards and Technology, Gaithersburg, MD, 2007.
+
+\bibitem{tenseal2021}
+A.~Bourse, R.~Gentry, S.~Halevi, and H.~Raykova, ``TenSEAL: A library for doing homomorphic encryption operations on tensors,'' \emph{OpenMined Technical Whitepaper}, 2021.
+
+\bibitem{presidio2021}
+Microsoft Corporation, ``Microsoft Presidio: Data protection and de-identification SDK,'' \emph{Microsoft Open Source}, 2021. Available: \url{https://github.com/microsoft/presidio}.
+
+\bibitem{honnibal2017spacy}
+M.~Honnibal and I.~Montani, ``spaCy 2: Natural language understanding with Bloom embeddings, convolutional neural networks and incremental parsing,'' \emph{Explosion AI}, 2017.
+
+\bibitem{devlin2019bert}
+J.~Devlin, M.-W. Chang, K.~Lee, and K.~Toutanova, ``BERT: Pre-training of deep bidirectional transformers for language understanding,'' in \emph{Proc. NAACL-HLT}, 2019, pp.~4171--4186.
+
+\bibitem{bradski2000opencv}
+G.~Bradski, ``The OpenCV library,'' \emph{Dr. Dobb's Journal of Software Tools}, vol.~25, no.~11, pp.~120--125, 2000.
+
+\bibitem{dpdp2023}
+Ministry of Law and Justice, Government of India, ``The Digital Personal Data Protection Act, 2023 (No. 22 of 2023),'' \emph{The Gazette of India}, Aug. 2023.
+
+\bibitem{rbi2023}
+Reserve Bank of India, ``Master direction on information technology governance, risk, controls and regulatory compliance,'' \emph{RBI Master Direction}, RBI/2023-24/107, Nov. 2023.
+
+\bibitem{gdpr2016}
+European Parliament and Council of the European Union, ``Regulation (EU) 2016/679 on the protection of natural persons with regard to the processing of personal data (GDPR),'' \emph{Official Journal of the European Union}, L119, May 2016.
+
+\bibitem{fastapi2020}
+S.~Ram\'irez, ``FastAPI: Modern, fast (high-performance) web framework for building APIs with Python,'' 2020. Available: \url{https://fastapi.tiangolo.com}.
+
+\bibitem{streamlit2021}
+Streamlit Inc., ``Streamlit: The fastest way to build and share data apps,'' 2021. Available: \url{https://streamlit.io}.
+
+\end{thebibliography}
+
+\appendix
+\chapter{Source Code Listings}
+
+\section{TenSEAL CKKS Homomorphic Engine (\texttt{gateway/ckks\_engine.py})}
+\begin{lstlisting}[language=Python]
+class CKKSKeyHolder:
+    def __init__(self, poly_modulus_degree: int = 8192, 
+                 coeff_mod_bit_sizes=(58, 50, 50, 58), scale_bits: int = 50):
+        self._ctx = ts.context(ts.SCHEME_TYPE.CKKS, 
+                               poly_modulus_degree=poly_modulus_degree,
+                               coeff_mod_bit_sizes=list(coeff_mod_bit_sizes))
+        self._ctx.global_scale = 2 ** scale_bits
+
+    def public_context_bytes(self) -> bytes:
+        return self._ctx.serialize(save_secret_key=False)
+
+    def encrypt_float(self, value: float) -> bytes:
+        vec = ts.ckks_vector(self._ctx, [float(value)])
+        return vec.serialize()
+
+    def decrypt_float(self, ciphertext_bytes: bytes) -> float:
+        vec = ts.ckks_vector_from(self._ctx, ciphertext_bytes)
+        return float(vec.decrypt()[0])
+\end{lstlisting}
+
+\section{Deterministic HMAC Tokenizer \& AES-256-GCM Vault}
+\begin{lstlisting}[language=Python]
+class DeterministicHMACPseudonymizer:
+    def __init__(self, master_key: bytes = b"SecureSphereHMACMasterKey256Bit!"):
+        self.master_key = master_key[:32]
+
+    def pseudonymize(self, text: str, entity_type: str) -> str:
+        entity_clean = text.strip()
+        h = hmac.new(self.master_key, f"{entity_type}:{entity_clean}".encode(), hashlib.sha256)
+        token_id = base64.b32encode(h.digest()[:8]).decode().replace("=", "")
+        prefix = entity_type[:4].upper()
+        return f"[TOKEN_HMAC_{prefix}_{token_id}]"
+
+class AES256GCMTokenVault:
+    def __init__(self, master_key: bytes = b"SecureSphereAESVaultMasterKey32B"):
+        self.aesgcm = AESGCM(master_key[:32])
+        self._storage = {}
+
+    def store_token(self, token: str, plaintext: str):
+        nonce = os.urandom(12)
+        encrypted = self.aesgcm.encrypt(nonce, plaintext.encode(), token.encode())
+        self._storage[token] = (nonce, encrypted)
+\end{lstlisting}
+
+\end{document}

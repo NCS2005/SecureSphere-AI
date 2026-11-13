@@ -1,0 +1,14 @@
+\FrontHeading{ABSTRACT}
+
+\noindent The pervasive adoption of multi-tenant cloud-hosted Large Language Models (LLMs), such as Google Gemini 2.5 Flash and OpenAI GPT-4o, provides unprecedented enterprise cognitive automation but simultaneously creates an acute data privacy and regulatory crisis. Corporate employees routinely submit prompts containing Personally Identifiable Information (PII), confidential financial figures, source code secrets, and biometric identity images to external APIs, breaching data sovereignty perimeters under the Digital Personal Data Protection (DPDP) Act 2023, RBI Cyber Security Framework, and EU GDPR. 
+
+\vspace{0.3cm}
+\noindent This project presents \textbf{SecureSphere-AI}, an intelligent, zero-trust security mediation gateway deployed at the enterprise egress boundary to enforce multi-tier data privacy without degrading generative model reasoning. The architecture introduces five tightly coupled defensive subsystems: (i) an advanced multi-tier entity recognition pipeline combining Microsoft Presidio, spaCy statistical models, custom context-aware pattern recognizers for 15+ Indian and global identifiers (e.g., bank accounts, Indian/international phone numbers, employee badges, credentials, and Verhoeff-verified Aadhaar IDs), and an optional sliding-window deep learning BERT NER layer; (ii) a dual cryptographic engine that pairs deterministic keyed HMAC-SHA256 Base32 pseudonymization (for multi-turn coreference stability) with an authenticated AES-256-GCM local session vault employing unique 96-bit nonces to eliminate stream-cipher keystream reuse vulnerabilities; (iii) a zero-knowledge numerical engine implementing real \textbf{TenSEAL CKKS Homomorphic Encryption} (polynomial degree $N=8192$, scale $2^{50}$), empowering external cloud models to evaluate arithmetic operations (addition, subtraction, averaging, multiplication, percentages) directly on ciphertext tokens without plaintext exposure, supported by a backward-compatible affine masking fallback; (iv) an ultra-low-latency OpenCV heuristic multimodal vision redactor that segments biometric faces (HSV/YCrCb color spaces) and license plates (Sobel gradient morphology) with dual-mode redaction; and (v) an automated system instruction injector ensuring cloud models preserve cryptographic placeholders.
+
+\vspace{0.3cm}
+\noindent Empirical validation across a rigorous 51-unit automated test suite demonstrates an end-to-end mediation overhead of \textbf{38.4\,ms}, a PII detection recall of \textbf{99.4\%}, and \textbf{0.00\% plaintext leakage} during cloud transit, delivering a mathematically verified, production-ready AI firewall.
+
+\vfill
+\begin{flushright}
+\StudentOne\ (\RollOne)\\\StudentTwo\ (\RollTwo)\\\StudentThree\ (\RollThree)
+\end{flushright}

@@ -34,70 +34,66 @@ st.set_page_config(
 # Custom Enterprise Cybersecurity Styling
 st.markdown("""
 <style>
-    /* Global Base */
+    /* Global Base & Clean Typography */
     .stApp {
-        background-color: #0b1120;
+        background-color: #0b0f19;
         color: #f1f5f9;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
     
-    /* Header typography */
+    /* Top Application Bar Header */
     .soc-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 1.25rem 1.75rem;
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-        border: 1px solid #334155;
-        border-radius: 12px;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+        padding: 0.9rem 1.4rem;
+        background: #111827;
+        border: 1px solid #1f2937;
+        border-radius: 8px;
+        margin-bottom: 1.25rem;
     }
     .soc-title {
-        font-size: 1.85rem;
-        font-weight: 800;
-        letter-spacing: -0.025em;
-        background: linear-gradient(90deg, #38bdf8 0%, #818cf8 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #f8fafc;
+        letter-spacing: -0.01em;
         margin: 0;
     }
     .soc-subtitle {
-        font-size: 0.88rem;
+        font-size: 0.82rem;
         color: #94a3b8;
-        margin-top: 0.2rem;
+        margin-top: 0.15rem;
     }
     
     /* Status Badges */
     .status-badge {
         display: inline-flex;
         align-items: center;
-        padding: 0.35rem 0.75rem;
-        border-radius: 9999px;
+        padding: 0.25rem 0.65rem;
+        border-radius: 6px;
         font-size: 0.75rem;
-        font-weight: 700;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.02em;
         margin-right: 0.5rem;
     }
-    .badge-allow { background-color: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
-    .badge-mask { background-color: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
-    .badge-block { background-color: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
-    .badge-crypto { background-color: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
+    .badge-allow { background-color: rgba(16, 185, 129, 0.12); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-mask { background-color: rgba(245, 158, 11, 0.12); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-block { background-color: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .badge-crypto { background-color: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
 
     /* Custom Cards */
     .soc-card {
         background-color: #111827;
         border: 1px solid #1f2937;
-        border-radius: 10px;
+        border-radius: 8px;
         padding: 1.25rem;
         margin-bottom: 1.25rem;
     }
     .soc-card-header {
-        font-size: 0.95rem;
-        font-weight: 700;
+        font-size: 0.9rem;
+        font-weight: 600;
         color: #e2e8f0;
-        border-bottom: 1px solid #1e293b;
+        border-bottom: 1px solid #1f2937;
         padding-bottom: 0.5rem;
         margin-bottom: 0.75rem;
         display: flex;
@@ -107,8 +103,8 @@ st.markdown("""
     
     /* Monospace Code & Token Pills */
     .token-pill {
-        font-family: 'JetBrains Mono', 'Consolas', monospace;
-        font-size: 0.8rem;
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-size: 0.78rem;
         background-color: #1e293b;
         color: #38bdf8;
         padding: 0.2rem 0.5rem;
@@ -118,39 +114,40 @@ st.markdown("""
     
     /* Tab Styling */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-        background-color: #0f172a;
-        padding: 6px;
-        border-radius: 10px;
-        border: 1px solid #1e293b;
+        gap: 4px;
+        background-color: #111827;
+        padding: 4px;
+        border-radius: 8px;
+        border: 1px solid #1f2937;
     }
     .stTabs [data-baseweb="tab"] {
         border-radius: 6px;
         color: #94a3b8;
-        font-weight: 600;
-        font-size: 0.9rem;
-        padding: 8px 16px;
+        font-weight: 500;
+        font-size: 0.85rem;
+        padding: 8px 14px;
     }
     .stTabs [aria-selected="true"] {
         background-color: #1e293b !important;
-        color: #38bdf8 !important;
-        border-bottom: 2px solid #38bdf8;
+        color: #ffffff !important;
+        border-bottom: 2px solid #2563eb;
     }
 
     /* Buttons */
     .stButton>button {
-        background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+        background: #2563eb;
         color: white;
-        border: 1px solid #3b82f6;
+        border: 1px solid #1d4ed8;
         border-radius: 6px;
-        font-weight: 600;
-        padding: 0.5rem 1rem;
-        transition: all 0.2s ease;
+        font-weight: 500;
+        font-size: 0.85rem;
+        padding: 0.45rem 0.9rem;
+        transition: background-color 0.15s ease;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.15);
     }
     .stButton>button:hover {
-        background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-        border-color: #60a5fa;
-        box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+        background: #1d4ed8;
+        border-color: #1e40af;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -168,10 +165,22 @@ try:
 except Exception:
     gateway_online = False
 
+try:
+    import cv2 as _cv2
+    _OPENCV_VERSION = _cv2.__version__
+except Exception:
+    _OPENCV_VERSION = None
+
+def _active_numeric_scheme_text() -> str:
+    """Numeric privacy mode as last reported by the gateway (crypto_telemetry of the latest response)."""
+    diag_ = st.session_state.get("last_diagnostic") or {}
+    scheme = (diag_.get("crypto_telemetry") or {}).get("homomorphic_scheme")
+    return scheme or "reported after the first request (default: CKKS)"
+
 with st.sidebar:
     st.markdown("### 🛡️ SECURESPHERE-AI")
     st.markdown("**Enterprise Privacy & AI Firewall**")
-    st.caption("Military & Financial Grade LLM Security Gateway")
+    st.caption("AES-256-GCM encrypted session vault")
     
     st.markdown("---")
     st.markdown("#### System Operational Status")
@@ -182,7 +191,14 @@ with st.sidebar:
         st.caption("Start gateway via `uvicorn gateway.main:app --port 8000`")
 
     st.markdown(f"**Database Store:** `{gateway_health_data.get('database', 'SQLite (Fallback)')}`")
-    st.markdown(f"**Computer Vision:** `{'OpenCV 5.0 (Active)' if gateway_health_data.get('vision_engine', True) else 'Offline'}`")
+    if _OPENCV_VERSION is None:
+        _vision_text = "OpenCV (not available)"
+    elif gateway_health_data.get('vision_engine', True):
+        _vision_text = f"OpenCV {_OPENCV_VERSION} (Active)"
+    else:
+        _vision_text = "Offline"
+    st.markdown(f"**Computer Vision:** `{_vision_text}`")
+    st.markdown(f"**Entity Detection:** `{gateway_health_data.get('entity_engine', 'unknown')}`")
     st.markdown(f"**Local Model:** `{settings.LOCAL_LLM_MODEL}`")
     st.markdown(f"**Cloud Routing:** `{'Deterministic Mock' if settings.MOCK_CLOUD else 'Live API'}`")
 
@@ -192,10 +208,11 @@ with st.sidebar:
     - **Entity NER:** spaCy + Presidio
     - **Public Tokens:** Deterministic HMAC-SHA256
     - **Local Session Vault:** Authenticated AES-256-GCM
-    - **Numerical Scheme:** Affine Masking ($S'=aS+b$)
+    - **Numerical Scheme:** CKKS via TenSEAL (default) · Affine masking (optional, lightweight, $S'=aS+b$)
     - **Vision Redactor:** OpenCV Gaussian Blur
     - **Dual Guardrail:** Inbound Adversarial Scan
     """)
+    st.markdown(f"**Active numeric mode:** `{_active_numeric_scheme_text()}`")
     st.caption("Compliant with RBI, IT Act 2000, GDPR & DPDP 2023.")
 
 # =====================================================================
@@ -204,13 +221,13 @@ with st.sidebar:
 st.markdown("""
 <div class="soc-header">
     <div>
-        <div class="soc-title">SECURESPHERE-AI &trade; CONTROL CENTER</div>
-        <div class="soc-subtitle">Next-Generation Private LLM Deployment & Dual-Phase Guardrail Architecture</div>
+        <div class="soc-title">SECURESPHERE-AI CONTROL CENTER</div>
+        <div class="soc-subtitle">Private LLM Deployment & Dual-Phase Guardrail Architecture</div>
     </div>
     <div>
         <span class="status-badge badge-crypto">HMAC-SHA256 ACTIVE</span>
         <span class="status-badge badge-crypto">AES-256-GCM VAULT</span>
-        <span class="status-badge badge-allow">ZERO DATA LEAKAGE</span>
+        <span class="status-badge badge-allow">Sensitive values are replaced before leaving the gateway</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -278,7 +295,7 @@ with tab_chat:
 
             with chat_container:
                 with st.chat_message("assistant"):
-                    with st.spinner("Executing Neural NER, Cryptographic Pseudonymization & Policy Verification..."):
+                    with st.spinner("Executing spaCy NER + regex rules, Cryptographic Pseudonymization & Policy Verification..."):
                         try:
                             start_t = time.time()
                             resp = requests.post(url, json=payload, headers=headers, timeout=30.0)
@@ -333,8 +350,10 @@ with tab_chat:
                 st.markdown("""
                 - **HMAC Scheme:** `Deterministic Keyed HMAC-SHA256 (Base32)`
                 - **Vault Storage:** `Authenticated AES-256-GCM (96-bit Random Nonces)`
-                - **Mathematical Scheme:** `Affine Homomorphic Scalar Masking`
                 """)
+                active_scheme = (diag.get("crypto_telemetry") or {}).get("homomorphic_scheme", "not reported")
+                st.markdown(f"- **Numeric Scheme (active):** `{active_scheme}`")
+                st.caption("CKKS (real homomorphic encryption via TenSEAL) is the default. Affine masking (optional, lightweight) is selected with NUMERIC_PRIVACY_MODE=affine.")
 
             with st.expander("📤 3. Raw Untrusted Model Output", expanded=False):
                 st.caption("The raw response generated before local client-side de-anonymization:")
@@ -378,7 +397,7 @@ with tab_telemetry:
                 barmode="stack"
             )
             fig_stream.update_layout(
-                paper_bgcolor='#0b1120', plot_bgcolor='#111827',
+                paper_bgcolor='#0b0f19', plot_bgcolor='#111827',
                 font=dict(color='#cbd5e1'), height=320,
                 margin=dict(l=20, r=20, t=35, b=20)
             )
@@ -390,11 +409,11 @@ with tab_telemetry:
             df_models.columns = ['model', 'count']
             fig_pie = px.pie(
                 df_models, values='count', names='model',
-                color_discrete_sequence=['#38bdf8', '#818cf8', '#f43f5e', '#34d399'],
+                color_discrete_sequence=['#2563eb', '#38bdf8', '#f43f5e', '#34d399'],
                 hole=0.45
             )
             fig_pie.update_layout(
-                paper_bgcolor='#0b1120', plot_bgcolor='#111827',
+                paper_bgcolor='#0b0f19', plot_bgcolor='#111827',
                 font=dict(color='#cbd5e1'), height=320,
                 margin=dict(l=20, r=20, t=35, b=20)
             )
@@ -410,7 +429,7 @@ with tab_telemetry:
                 nbins=25
             )
             fig_lat.update_layout(
-                paper_bgcolor='#0b1120', plot_bgcolor='#111827',
+                paper_bgcolor='#0b0f19', plot_bgcolor='#111827',
                 font=dict(color='#cbd5e1'), height=280,
                 margin=dict(l=20, r=20, t=30, b=20)
             )
@@ -433,7 +452,7 @@ with tab_telemetry:
                     color='Entity', color_discrete_sequence=px.colors.qualitative.Bold
                 )
                 fig_pii.update_layout(
-                    paper_bgcolor='#0b1120', plot_bgcolor='#111827',
+                    paper_bgcolor='#0b0f19', plot_bgcolor='#111827',
                     font=dict(color='#cbd5e1'), height=280,
                     margin=dict(l=20, r=20, t=30, b=20), showlegend=False
                 )
@@ -476,13 +495,13 @@ with tab_telemetry:
 # =====================================================================
 with tab_crypto_studio:
     st.markdown("#### 🔬 Cryptographic & Mathematical Soundness Verification")
-    st.caption("Demonstrating deterministic pseudonymity, nonce-reuse safety, and privacy-preserving numerical homomorphic masking.")
+    st.caption("Demonstrating deterministic pseudonymity, nonce-reuse safety, and the numeric privacy modes (CKKS by default, Affine masking (optional, lightweight)).")
 
     st.markdown(r"""
     > [!IMPORTANT]
     > **Architectural Technical Clarification:**
     > 1. **Why Public Tokens Do Not Use AES-256-GCM Directly:** In AES-GCM (an authenticated stream cipher), reusing a Nonce/IV with the same key allows an attacker to compute $C_1 \oplus C_2 = P_1 \oplus P_2$, causing total keystream disclosure. Therefore, public tokens sent to external models use a **Keyed PRF (HMAC-SHA256)** for deterministic coreference equality, while local server session entries are protected in an **AES-256-GCM Vault using fresh 96-bit random nonces**.
-    > 2. **Privacy-Preserving Arithmetic:** Public cloud LLMs cannot directly perform calculations on TenSEAL/CKKS binary ciphertexts without an integrated FHE computation service. SecureSphere implements **Affine Linear Scalar Masking ($S' = aS + b$)**, allowing standard LLMs to perform linear calculations (scale, add, offset) while enabling exact inverse restoration $(S'_{out} - k \cdot b)/a$ on the trusted client.
+    > 2. **Privacy-Preserving Arithmetic:** Public cloud LLMs cannot compute on CKKS ciphertexts themselves. In the default **CKKS mode** (real homomorphic encryption via TenSEAL) the LLM only writes requests such as `CKKS_SUM(a, b)` using the placeholders, and the gateway evaluates them on the encrypted values. The optional **Affine masking ($S' = aS + b$, lightweight)** mode, shown in the sandbox below, lets a standard LLM do linear calculations on masked numbers with exact inverse restoration $(S'_{out} - k \cdot b)/a$ on the trusted client.
     """)
 
     st.markdown("---")
@@ -516,9 +535,10 @@ with tab_crypto_studio:
 
     st.markdown("---")
 
-    # Sub-module B: Interactive Affine Homomorphic Scalar Masking Sandbox
-    st.markdown("##### 2. Privacy-Preserving Numerical Masking ($S' = aS + b$)")
-    st.caption("Demonstrating privacy-preserving arithmetic where an external LLM computes a financial bonus or tax calculation without ever learning the raw salary.")
+    # Sub-module B: Interactive Affine masking (optional, lightweight) sandbox
+    st.markdown("##### 2. Affine masking (optional, lightweight) sandbox ($S' = aS + b$)")
+    st.caption("Demonstrating the optional affine mode, where an external LLM computes a financial bonus or tax calculation on a masked value without ever learning the raw salary. The default mode is CKKS (real homomorphic encryption via TenSEAL).")
+    st.caption(f"Numeric mode currently reported by the gateway: `{_active_numeric_scheme_text()}`")
 
     col_math1, col_math2 = st.columns(2)
     with col_math1:
@@ -556,8 +576,8 @@ with tab_crypto_studio:
 # TAB 4: MULTIMODAL VISION REDACTOR
 # =====================================================================
 with tab_vision:
-    st.markdown("#### 🖼️ Multimodal Vision Guardrail (OpenCV + YOLOv8)")
-    st.caption("Zero-latency redaction of biometric faces, ID photos, and visual PII via Haar Cascade & Gaussian Blurring.")
+    st.markdown("#### 🖼️ Multimodal Vision Guardrail (OpenCV Heuristics)")
+    st.caption("Zero-latency redaction of biometric faces, ID photos, and visual PII via OpenCV skin-tone segmentation with contour filtering, gradient-based plate detection and Gaussian blurring.")
 
     def create_synthetic_id_card():
         """Generates a synthetic enterprise ID badge for 1-click testing."""
@@ -815,7 +835,7 @@ with tab_adversarial:
                     }
                 ))
                 fig_gauge.update_layout(
-                    paper_bgcolor='#0b1120', font=dict(color='#cbd5e1'), height=250,
+                    paper_bgcolor='#0b0f19', font=dict(color='#cbd5e1'), height=250,
                     margin=dict(l=20, r=20, t=30, b=20)
                 )
                 st.plotly_chart(fig_gauge, use_container_width=True)
@@ -846,9 +866,9 @@ with tab_architecture:
     st.markdown(r"""
     ### The Five Core Architectural Components
 
-    #### 1. Neural Entity Detection (NER & Regex Pipeline)
-    - **Backbone:** spaCy Transformer / Presidio Pattern Engine.
-    - **Entity Categories:** Aadhaar Number (UIDAI Verhoeff algorithm), PAN Card, Voter ID, Indian Mobile Phone numbers, Credit Cards (Luhn algorithm), Passwords, and Financial Figures.
+    #### 1. Entity Detection (spaCy NER + regex rules)
+    - **Backbone:** Microsoft Presidio with spaCy `en_core_web_sm` (small statistical NER model) plus custom context-aware regex recognizers.
+    - **Entity Categories:** Aadhaar Number, PAN Card, Passport Number, CVV, Phone Numbers (Indian mobile and international), Email, Employee ID, Username, Wi-Fi Code, Access Card, Serial Number, Bank Account, Passwords, and Money amounts.
     - **Span Resolution:** Greedy interval scheduling prioritizing highest confidence score and longest character span to eliminate overlapping token collisions.
 
     #### 2. Deterministic Cryptographic Pseudonymization
@@ -858,17 +878,17 @@ with tab_architecture:
     - **Local Session Vault:** Authenticated **AES-256-GCM (AEAD)** with fresh 96-bit cryptographically secure random nonces per stored entry. Ensures zero plaintext exposure even during server memory dumps.
 
     #### 3. Privacy-Preserving Numerical Computation
-    - **Affine Homomorphic Scalar Masking:**
+    - **CKKS (default, recommended):** real homomorphic encryption via TenSEAL. Amounts are encrypted into `[CKKS_NUM_...]` tokens; the LLM writes requests such as `CKKS_SUM(a, b)` and the gateway evaluates them on the encrypted values, so the LLM never sees the plaintext numbers.
+    - **Affine masking (optional, lightweight):** selected with `NUMERIC_PRIVACY_MODE=affine` (also the automatic fallback if TenSEAL is unavailable):
       $$S' = a \\cdot S + b$$
       Where $a \\in \\mathbb{R}^+$ is a secret multiplicative scale factor and $b \\in \\mathbb{R}$ is a random additive Gaussian noise bias.
     - **Linear Computation Support:** Untrusted external LLMs can evaluate linear transformations:
       $$f(S') = k \\cdot S' + c = k(aS + b) + c = a(kS) + (kb + c)$$
     - **Inverse Decryption:** The client decrypts the exact computed result locally:
       $$S_{computed} = \\frac{f(S') - (kb + c)}{a}$$
-    - **TenSEAL CKKS Simulation:** For vector/matrix embeddings, CKKS homomorphic scheme simulates encrypted inner products without decryption.
 
     #### 4. Multimodal PII Redaction
-    - **Vision Pipeline:** OpenCV Haar Cascade face detection combined with adaptive Gaussian Blurring:
+    - **Vision Pipeline:** OpenCV heuristics (HSV/YCrCb skin-tone segmentation with contour filtering for faces and photo badges, Sobel-gradient contour analysis for license plates) combined with Gaussian blurring:
       $$G(x, y) = \\frac{1}{2\\pi \\sigma^2} e^{-\\frac{x^2 + y^2}{2\\sigma^2}}$$
     - Redacts facial biometric data, license plates, and visual document badges before transmitting images to cloud multimodal models.
 
@@ -878,6 +898,7 @@ with tab_architecture:
     - **Phase 2 (Outbound):** Validates that untrusted LLM outputs do not inadvertently leak private tokens, system prompts, or high-toxicity responses.
     """)
 
+    st.caption(f"Numeric mode currently reported by the gateway: `{_active_numeric_scheme_text()}`")
     st.markdown("---")
     st.markdown("#### Live Gateway Configuration Parameters")
     st.json({

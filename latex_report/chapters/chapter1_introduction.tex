@@ -1,0 +1,75 @@
+\chapter{Introduction}
+
+\section{Problem Statement}
+The modern enterprise computing paradigm is experiencing a fundamental transition propelled by generative artificial intelligence and trillion-parameter Large Language Models (LLMs), such as Google Gemini 2.5 Flash, Anthropic Claude 3.5, and OpenAI GPT-4o. While these foundation models dramatically enhance developer productivity, automated code synthesis, and data analytics, their multi-tenant cloud-hosted deployment exposes enterprise data to acute vulnerabilities.
+
+Employees routinely copy and paste sensitive operational data into public chat interfaces. This data encompasses Personally Identifiable Information (PII) including national identification numbers (Aadhaar, PAN), financial records, banking account details, passwords, internal API tokens, and corporate network configurations. Once transmitted over the public internet to third-party model providers, this data breaches the internal security perimeter, creating three critical vulnerabilities:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Data Leakage \& Storage Ingestion:} Unencrypted prompts and sensitive figures are logged in cloud vendor telemetry or ingested into subsequent model retraining corpora, enabling unintentional cross-tenant leakage.
+    \item \textbf{Loss of Numeric Confidentiality in Financial Reasoning:} When corporate users query cloud models to compute financial projections, tax computations, or salary bonuses, the raw numerical values are laid bare, disclosing confidential balance sheets.
+    \item \textbf{Adversarial Jailbreaks \& Inbound Exploits:} Attackers embed adversarial prompt-injection payloads (e.g., ``DAN mode'', ``developer overrides'', or obfuscated base64 attacks) designed to bypass safety filters and exfiltrate internal system context.
+\end{enumerate}
+
+\section{Objectives}
+The primary objective of \textbf{SecureSphere-AI} is to design, implement, and validate an asynchronous, privacy-preserving AI firewall that functions as a transparent reverse proxy between enterprise endpoints and external cloud LLMs. The specific measurable objectives are:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Zero-Trust Inbound Sanitization:} Intercept all prompt traffic and automatically detect, classify, and pseudonymize 15+ categories of PII, financial identifiers, and enterprise credentials with recall exceeding 99\%.
+    \item \textbf{Zero-Knowledge Numerical Homomorphic Encryption:} Implement true \textbf{TenSEAL CKKS Homomorphic Encryption} ($N=8192$, scale $2^{50}$) to encrypt financial figures into ciphertext tokens, enabling cloud LLMs to evaluate arithmetic operations (addition, subtraction, averaging, multiplication, percentages) directly on encrypted data without ever observing plaintext numbers.
+    \item \textbf{Deterministic Coreference Pseudonymization:} Generate stable HMAC-SHA256 Base32 pseudonym tokens to preserve multi-turn linguistic relationships, backed by an authenticated AES-256-GCM session vault with fresh 96-bit random nonces per stored entry.
+    \item \textbf{Sub-Millisecond Multimodal Biometric Redaction:} Develop a zero-GPU OpenCV heuristic computer vision pipeline to redact facial biometrics and vehicle license plates in under 15\,ms per image across Dual Redaction Modes.
+    \item \textbf{Automated LLM System Note Injection:} Automatically inject constraints into external LLM prompts to force cloud models to strictly copy and preserve cryptographic placeholders without hallucinations or syntax degradation.
+    \item \textbf{Ultra-Low Mediation Latency:} Maintain an end-to-end gateway proxy mediation overhead below 50\,ms to ensure seamless interactive human-in-the-loop performance.
+\end{enumerate}
+
+\section{Motivation}
+Organizations in India and globally operate under increasingly stringent statutory compliance regimes:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Digital Personal Data Protection (DPDP) Act 2023:} Mandates that Data Fiduciaries implement reasonable technical safeguards to protect personal data, imposing statutory financial penalties of up to \textyen 250 Crores for data breaches.
+    \item \textbf{Reserve Bank of India (RBI) Cyber Security Directives:} Enforces mandatory field-level encryption and strict confidentiality controls over financial and banking identifiers.
+    \item \textbf{IT Act 2000 (Section 43A) \& European Union GDPR (Articles 25 \& 32):} Mandates data protection by design and default, enforcing strict civil liabilities for unauthorized disclosure of sensitive personal data or information (SPDI).
+\end{itemize}
+Hosting comparable trillion-parameter models strictly on-premises is economically unfeasible for most enterprises due to exorbitant GPU hardware acquisition and energy costs. SecureSphere-AI bridges this gap, allowing organizations to securely utilize top-tier cloud foundation models with mathematical privacy guarantees.
+
+\section{Scope}
+The scope of the project encompasses:
+\begin{itemize}[leftmargin=*]
+    \item Development of an asynchronous RESTful API gateway built on FastAPI and Uvicorn.
+    \item Integration of Microsoft Presidio and spaCy statistical models, supplemented by 15+ custom regular expression and cue-based pattern recognizers.
+    \item An optional CPU-based deep learning BERT NER layer with sliding-window boundary chunking.
+    \item Mathematical implementation of the TenSEAL CKKS homomorphic scheme and an affine linear masking fallback ($S' = aS + b$).
+    \item Development of an OpenCV-based computer vision guardrail supporting Mode A (Biometric Gaussian Blur) and Mode B (Zero-Knowledge ID Badge Black-Box Redaction).
+    \item Implementation of a dual-phase policy engine for prompt-injection scoring and outbound leak validation.
+    \item Implementation of a self-healing hybrid audit logger (MongoDB with automatic failover to SQLite).
+    \item Design of an authentic enterprise Security Operations Center (SOC) dashboard built on Streamlit with interactive multimodal paste-bar components.
+\end{itemize}
+
+\section{Software and Hardware Requirements}
+
+\subsection{Hardware Specifications}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Processor:} Multi-core 64-bit CPU (Intel Core i5-11th Gen / AMD Ryzen 5 5000 series or higher).
+    \item \textbf{System Memory (RAM):} Minimum 8\,GB (16\,GB recommended for hosting local offline Ollama models).
+    \item \textbf{Storage:} 256\,GB NVMe Solid State Drive (SSD) with at least 5\,GB free disk space.
+    \item \textbf{Network Interface:} Standard broadband connection for outbound cloud API communication.
+\end{itemize}
+
+\subsection{Software Specifications}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Operating System:} Microsoft Windows 10/11 (64-bit) or Ubuntu Linux 22.04 LTS.
+    \item \textbf{Programming Language:} Python 3.11 / 3.14.
+    \item \textbf{Web Frameworks:} FastAPI 0.100+, Uvicorn 0.22+, Streamlit 1.28+.
+    \item \textbf{Cryptographic Libraries:} TenSEAL 0.3.18, PyCryptodome 3.18+, Cryptography 41.0+.
+    \item \textbf{NLP \& AI Frameworks:} Microsoft Presidio (Analyzer \& Anonymizer 2.2+), spaCy 3.5+ (\texttt{en\_core\_web\_sm}), optional Hugging Face Transformers (\texttt{dslim/bert-base-NER}).
+    \item \textbf{Computer Vision:} OpenCV (\texttt{opencv-python} 4.10+), NumPy 1.24+.
+    \item \textbf{Databases:} MongoDB 7.0 and SQLite3.
+\end{itemize}
+
+\section{Report Organization}
+The remainder of this report is organized as follows:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Chapter 2 (Literature Survey):} Reviews the state-of-the-art in LLM privacy, homomorphic cryptography, tokenization schemes, and existing DLP systems.
+    \item \textbf{Chapter 3 (System Design):} Details the architectural topology, data flow models, module specifications, and project execution schedule.
+    \item \textbf{Chapter 4 (Implementation):} Provides an exhaustive code-level analysis of the cryptographic engine, PII detection logic, multimodal vision filters, and gateway middleware.
+    \item \textbf{Chapter 5 (Testing \& Results):} Documents the 51-unit automated test suite, empirical benchmarks, and comparative evaluation against baseline methodologies.
+    \item \textbf{Chapter 6 (Conclusion \& Future Enhancements):} Summarizes the major research findings, practical limitations, and outlines future directions including differential privacy and post-quantum cryptography.
+\end{itemize}

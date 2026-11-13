@@ -32,4 +32,10 @@ class Settings:
     TOXICITY_THRESHOLD: float = float(os.getenv("TOXICITY_THRESHOLD", 0.80))
     LOG_RAW_PII: bool = os.getenv("LOG_RAW_PII", "false").lower() in ("true", "1", "yes")
 
+    # Entity detection engine: "spacy" (default) or "spacy_bert" (adds an optional BERT NER layer)
+    ENTITY_ENGINE: str = os.getenv("ENTITY_ENGINE", "spacy").strip().lower()
+    BERT_NER_MODEL: str = os.getenv("BERT_NER_MODEL", "dslim/bert-base-NER").strip()
+    BERT_MIN_SCORE: float = float(os.getenv("BERT_MIN_SCORE", 0.80))
+    BERT_ENTITY_TYPES: str = os.getenv("BERT_ENTITY_TYPES", "PER,ORG,LOC")
+
 settings = Settings()
