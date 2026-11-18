@@ -232,6 +232,20 @@ def list_prompts() -> List[Dict[str, Any]]:
     ]
 
 
+def run_async(coro):
+    """Safely executes an async coroutine whether called from sync stdio or a running FastAPI event loop."""
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = None
+
+    if loop and loop.is_running():
+        import concurrent.futures
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+            return pool.submit(asyncio.run, coro).result()
+    return asyncio.run(coro)
+
+
 def handle_tool_call(name: str, arguments: Dict[str, Any]) -> str:
     """Executes the requested tool using existing SecureSphere backend modules."""
     start_time = time.time()
@@ -273,7 +287,7 @@ def handle_tool_call(name: str, arguments: Dict[str, Any]) -> str:
 
         # 3. Secure Cloud Transit (Cloud receives ONLY tokens)
         try:
-            cloud_response = asyncio.run(call_cloud_llm(sanitized_prompt))
+            cloud_response = run_async(call_cloud_llm(sanitized_prompt))
         except Exception as e:
             return f"Error communicating with cloud model: {str(e)}"
 
@@ -400,7 +414,7 @@ def handle_tool_call(name: str, arguments: Dict[str, Any]) -> str:
 
         # 3. Call Cloud Vision with REDACTED image and sanitized prompt
         try:
-            cloud_response = asyncio.run(call_cloud_multimodal(sanitized_prompt, anonymized_b64))
+            cloud_response = run_async(call_cloud_multimodal(sanitized_prompt, anonymized_b64))
         except Exception as e:
             return f"Error communicating with cloud multimodal model: {str(e)}"
 
