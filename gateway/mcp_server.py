@@ -336,6 +336,20 @@ def handle_tool_call(name: str, arguments: Dict[str, Any]) -> str:
 
         out_b64 = base64.b64encode(anonymized_bytes).decode("utf-8") if not saved_path else None
 
+        latency_ms = int((time.time() - start_time) * 1000)
+        log_transaction(
+            user_id="mcp_user",
+            prompt=image_path or "[IMAGE_BASE64]",
+            sanitized_prompt=f"Mode: {mode}",
+            response=f"Redacted {telemetry.get('total_redactions', 0)} visual elements (Faces: {telemetry.get('faces_blurred', 0)}, Plates: {telemetry.get('plates_blurred', 0)})",
+            model_used="opencv_vision (via MCP)",
+            pii_detected=telemetry.get("total_redactions", 0) > 0,
+            pii_types=["BIOMETRIC_FACE_OR_PLATE"] if telemetry.get("total_redactions", 0) > 0 else [],
+            status="SUCCESS",
+            toxicity_score=0.0,
+            latency_ms=latency_ms
+        )
+
         return json.dumps({
             "status": "SUCCESS",
             "mode": mode,
@@ -413,6 +427,22 @@ def handle_tool_call(name: str, arguments: Dict[str, Any]) -> str:
         raw_text = arguments.get("text") or arguments.get("raw_data") or ""
         sanitized, mapping, changed = anonymize_prompt(raw_text)
         _ACTIVE_MAPPINGS["last"] = mapping
+
+        latency_ms = int((time.time() - start_time) * 1000)
+        pii_types = [mapping[k].split(":")[0] if ":" in mapping[k] else "PII" for k in mapping]
+        log_transaction(
+            user_id="mcp_user",
+            prompt=raw_text,
+            sanitized_prompt=sanitized,
+            response=f"Vaulted {len(mapping)} tokens with CKKS/HMAC",
+            model_used="offline_sanitizer (via MCP)",
+            pii_detected=changed,
+            pii_types=pii_types,
+            status="SUCCESS",
+            toxicity_score=0.0,
+            latency_ms=latency_ms
+        )
+
         return json.dumps({
             "sanitized_text": sanitized,
             "tokens_vaulted": len(mapping),
@@ -424,9 +454,37 @@ def handle_tool_call(name: str, arguments: Dict[str, Any]) -> str:
         text = arguments.get("text", "")
         mapping = _ACTIVE_MAPPINGS.get("last", {})
         restored = deanonymize_response(text, mapping)
+
+        latency_ms = int((time.time() - start_time) * 1000)
+        log_transaction(
+            user_id="mcp_user",
+            prompt=text,
+            sanitized_prompt="[DEANONYMIZED]",
+            response=restored,
+            model_used="offline_decryptor (via MCP)",
+            pii_detected=bool(mapping),
+            pii_types=["RESTORED_PII"],
+            status="SUCCESS",
+            toxicity_score=0.0,
+            latency_ms=latency_ms
+        )
+
         return restored
 
     elif name == "get_security_telemetry":
+        latency_ms = int((time.time() - start_time) * 1000)
+        log_transaction(
+            user_id="mcp_user",
+            prompt="get_security_telemetry",
+            sanitized_prompt="[TELEMETRY_POLL]",
+            response="OPERATIONAL_OFFLINE",
+            model_used="offline_telemetry (via MCP)",
+            pii_detected=False,
+            pii_types=[],
+            status="SUCCESS",
+            toxicity_score=0.0,
+            latency_ms=latency_ms
+        )
         return json.dumps({
             "server": SERVER_NAME,
             "version": SERVER_VERSION,

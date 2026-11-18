@@ -13,6 +13,7 @@ from gateway.policy_engine import evaluate_policy
 from gateway.router import route_request
 from gateway.response_validator import validate_response, evaluate_toxicity
 from gateway.database import log_transaction
+from gateway.mcp_server import process_message
 
 # Configure logger
 logging.basicConfig(
@@ -87,6 +88,33 @@ def health_check():
         "enforce_toxicity": settings.ENFORCE_TOXICITY,
         "vision_engine": vision_detector.cv2_enabled,
         "entity_engine": entity_engine_description()
+    }
+
+@app.post("/mcp")
+async def mcp_http_endpoint(request: Request):
+    """
+    HTTP JSON-RPC endpoint for Model Context Protocol (MCP).
+    Allows ChatGPT and remote clients to query tools via standard HTTP POST.
+    """
+    try:
+        payload = await request.json()
+        response = process_message(payload)
+        return response or {}
+    except Exception as e:
+        logger.error(f"Error processing MCP HTTP request: {e}")
+        return {
+            "jsonrpc": "2.0",
+            "id": None,
+            "error": {"code": -32603, "message": str(e)}
+        }
+
+@app.get("/mcp")
+async def mcp_health():
+    """Health check endpoint for MCP server discovery."""
+    return {
+        "status": "online",
+        "server": "securesphere-privacy-guard",
+        "protocol": "2024-11-05"
     }
 
 class ImageAnonymizeRequest(BaseModel):
